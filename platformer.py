@@ -25,6 +25,23 @@ class Enemy(pygame.sprite.Sprite):
 			self.rect = self.image.get_rect()
 			self.rect.x = x
 			self.rect.y = y
+			self.counter = 0
+
+	def move(self):
+		"""
+			Enemy movement
+		"""
+		distance = 40
+		speed = 3
+
+		if self.counter >= 0 and self.counter <= distance:
+			self.rect.x += speed
+		elif self.counter >= distance and self.counter <= distance*2:
+			self.rect.x -= speed
+		else:
+			self.counter = 0
+
+		self.counter += 1
 
 
 class Player(pygame.sprite.Sprite):
@@ -37,6 +54,7 @@ class Player(pygame.sprite.Sprite):
 		self.movex = 0
 		self.movey = 0
 		self.frame = 0
+		self.health = 10
 		self.images = []
 		for i in range(1, 5):
 			img = pygame.image.load(os.path.join('images/player', 'player_right' + str(i) + '.png')).convert()
@@ -50,7 +68,7 @@ class Player(pygame.sprite.Sprite):
 		"""
 			Control player movement	
 		"""
-		self.movex += xaa
+		self.movex += x
 		self.movey += y
 
 	def update(self):
@@ -73,6 +91,12 @@ class Player(pygame.sprite.Sprite):
 			if self.frame > 3*ani:
 				self.frame = 0
 			self.image = self.images[self.frame//ani]
+
+		# enemy hit detection
+		hit_list = pygame.sprite.spritecollide(self, enemy_list, False)
+		for enemy in hit_list:
+			self.health -= 1
+			print(self.health)
 
 
 
@@ -125,6 +149,8 @@ while True:
 	player.update()
 	player_list.draw(screen)
 	enemy_list.draw(screen)
+	for e in enemy_list:
+		e.move()
 
 	for event in pygame.event.get(): # checks for any keyboard and mouse events
 		if event.type == QUIT: # forces the program to quit if the uses clicks the exit icon
